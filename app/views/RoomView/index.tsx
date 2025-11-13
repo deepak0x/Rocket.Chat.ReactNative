@@ -541,15 +541,14 @@ class RoomView extends React.Component<IRoomViewProps, IRoomViewState> {
 		const { room, member, joined, canForwardGuest, canReturnQueue, canViewCannedResponse, canPlaceLivechatOnHold } = this.state;
 		const { navigation, isMasterDetail } = this.props;
 		if (isMasterDetail) {
+			const targetScreen = (screen ?? 'RoomActionsView') as 'RoomActionsView';
 			navigation.navigate('ModalStackNavigator', {
-				screen: screen ?? 'RoomActionsView',
+				screen: targetScreen,
 				params: {
 					rid: this.rid as string,
 					t: this.t as SubscriptionType,
 					room: room as ISubscription,
 					member,
-					showCloseModal: !!screen,
-					// @ts-ignore
 					joined,
 					omnichannelPermissions: { canForwardGuest, canReturnQueue, canViewCannedResponse, canPlaceLivechatOnHold }
 				}
@@ -620,11 +619,13 @@ class RoomView extends React.Component<IRoomViewProps, IRoomViewState> {
 		if ('id' in room && t === 'd' && !isGroupChat(room)) {
 			try {
 				const roomUserId = getUidDirectMessage(room);
-				this.setState({ roomUserId }, () => this.setHeader());
+				if (roomUserId) {
+					this.setState({ roomUserId }, () => this.setHeader());
 
-				const result = await getUserInfo(roomUserId);
-				if (result.success) {
-					return result.user;
+					const result = await getUserInfo(roomUserId);
+					if (result.success) {
+						return result.user;
+					}
 				}
 			} catch (e) {
 				log(e);
